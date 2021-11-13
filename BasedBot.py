@@ -1,6 +1,7 @@
 import os
 import discord
 import json
+import re
 from dotenv import load_dotenv
 
 
@@ -31,9 +32,7 @@ def load():
 
 #Takes User as a discord User object
 def shitlist(user, isBased):
-    key = user.mention
-    if (not key.startswith('<@!')):
-        key = key[:2] + '!' + key[2:]
+    key = user.id
     if(not key in d):
         d[key] = [1,0,user.name] if isBased else [0,1,user.name]
     else:
@@ -71,7 +70,6 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     if(user.mention != reaction.message.author.mention):
         if str(reaction.emoji) == BASED_EMOJI:
-
             shitlist(reaction.message.author, True)
         elif str(reaction.emoji) == CRINGE_EMOJI:
             shitlist(reaction.message.author, False)
@@ -87,6 +85,7 @@ async def on_message(message):
         if(len(msgCont) == 1):
             await message.channel.send("This command requires a mention. Tag someone like this: '$based @username'")
         elif(msgCont[1].startswith('<@')):
+            msgCont[1] = re.sub("[^0-9]", "", msgCont[1])
             await message.channel.send(printBased(msgCont[1]))
         else:
             await message.channel.send("The given argument was not understood. Tag someone like this: '$based @username'")
@@ -100,6 +99,7 @@ async def on_message(message):
         if(len(msgCont) == 1):
             await message.channel.send("This command requires a mention. Tag someone like this: '$rank @username'")
         elif(msgCont[1].startswith('<@')):
+            msgCont[1] = re.sub("[^0-9]", "", msgCont[1])
             await message.channel.send(printRank(msgCont[1]))
         else:
             await message.channel.send("The given argument was not understood. Tag someone like this: '$rank @username'")
