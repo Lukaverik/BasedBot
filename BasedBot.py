@@ -57,6 +57,12 @@ def printBased(uid):
         return 'The user in question does not currently have a social credit score.'
     return ('The user {0} has a social credit score of {1}, with a number of based votes totaling {2} and a number of cringe votes totaling {3}!').format(score[3], score[0], score[1], score[2])
 
+def printTop():
+    pass
+
+def printRank():
+    pass
+
 @client.event
 async def on_ready():
     print('Logged in as {0.user}'.format(client))
@@ -65,28 +71,38 @@ async def on_ready():
 async def on_reaction_add(reaction, user):
     if(user.mention != reaction.message.author.mention):
         if str(reaction.emoji) == BASED_EMOJI:
-            #print("based")
-            #print(d)
+
             shitlist(reaction.message.author, True)
         elif str(reaction.emoji) == CRINGE_EMOJI:
-            #print("cring")
             shitlist(reaction.message.author, False)
 
 
 @client.event
 async def on_message(message):
-    if message.content.startswith('$based'):
-        msgCont = message.content.split()
-        #print(msgCont)
-        if(msgCont[1].startswith('<@')):
-            await message.channel.send(printBased(msgCont[1]))
-    if message.content.startswith('$balls'):
-        await message.channel.send('Hello!')
-        #print(message.content)
-        #print(message.author.name)
-        #print(message.author.id)
-        #print(message.author.mention)
+    #Split command into its arguments
+    msgCont = message.content.split()
 
+    #Command to check a user's social credit score
+    if message.content.startswith('$based'):
+        if(len(msgCont) == 1):
+            await message.channel.send("This command requires a mention. Tag someone like this: '$based @username'")
+        elif(msgCont[1].startswith('<@')):
+            await message.channel.send(printBased(msgCont[1]))
+        else:
+            await message.channel.send("The given argument was not understood. Tag someone like this: '$based @username'")
+
+    #Command to print the list of the 3 most based people.
+    if message.content.startswith('$top'):
+        await message.channel.send(printTop())
+
+    #Command to print the rank of a given user
+    if message.content.startswith('$rank'):
+        if(len(msgCont) == 1):
+            await message.channel.send("This command requires a mention. Tag someone like this: '$rank @username'")
+        elif(msgCont[1].startswith('<@')):
+            await message.channel.send(printRank(msgCont[1]))
+        else:
+            await message.channel.send("The given argument was not understood. Tag someone like this: '$rank @username'")
 
 d = load()
 
