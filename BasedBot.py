@@ -13,7 +13,7 @@ load_dotenv()
 client = discord.Client()
 
 
-#Both of these can be changed to your liking. For reference, \U0001f60e is the :sunglasses: emote, and \U0001f62c is the :grimacing" emote.
+#Both of these can be changed to your liking. For reference, \U0001f60e is the :sunglasses: emote, and \U0001f62c is the :grimacing: emote.
 BASED_EMOJI = '\U0001f60e'
 CRINGE_EMOJI = '\U0001f62c'
 
@@ -67,21 +67,43 @@ def getScore(uid):
     score = basedNum - cringeNum
     return [score, basedNum, cringeNum, username]
 
-#Takes user id, returns the formatted string to be posted, containing the user's name, score, and both vote numbers
+#Takes user id, returns the formatted string to be posted, containing a specific user's name, score, and both vote numbers
 def printBased(uid):
     score = getScore(uid)
     
     #This only happens if the user doesn't have a score.
     if(score == [-1,-1,-1,-1]):
         return 'The user in question does not currently have a social credit score.'
-        
+
     return ('The user {0} has a social credit score of {1}, with a number of based votes totaling {2} and a number of cringe votes totaling {3}!').format(score[3], score[0], score[1], score[2])
 
+#Returns a formatted string to be posted as a list of the 3 users with the highest social credit.
 def printTop():
-    return
+    #Start building the message body
+    msg = "The 3 users with the highest social credit score are: \n\n"
+    #Temporary dict, so as not to run d.items() 12 times
+    temp = d.items()
+    msg += ("1: {0} with a social credit score of {1}, based votes totaling {2}, and cringe votes totaling {3}. \n").format(temp[0][2], temp[0][0]-temp[0][1], temp[0][0], temp[0][1])
+    msg += ("2: {0} with a social credit score of {1}, based votes totaling {2}, and cringe votes totaling {3}. \n").format(temp[0][2], temp[0][0]-temp[0][1], temp[0][0], temp[0][1])
+    msg += ("3: {0} with a social credit score of {1}, based votes totaling {2}, and cringe votes totaling {3}.").format(temp[1][2], temp[1][0]-temp[1][1], temp[1][0], temp[1][1])
+    return msg
 
-def printRank():
-    pass
+#Returns a string to be posted, detailing the ranking of a specific user.
+def printRank(uid):
+    i = 1 #Keeps track of a user's index within the dictionary, and thus their ranking
+    msg = "" #Start building the message body.
+    for entry in d.items():
+        #If user ID matches, we found them
+        if(entry[0] == uid):
+            msg += ("{0} is currently ranked #{1} in this server, with a social credit score of {2}.").format(entry[1][2], i, entry[1][0] - entry[1][1])
+            break #Breaking is gross, but done here so the rest of the dictionary is not iterated over.
+        #If not a match, increment the index and try again.
+        else:
+            i += 1
+    #msg being empty means the for loop didn't find a match, meaning the user doesn't have a score.
+    if(msg == ""):
+        msg += "The user in question currently does not have a social credit score on this server, and as such is not ranked."
+    return msg
 
 @client.event
 async def on_ready():
@@ -102,7 +124,7 @@ async def on_message(message):
     msgCont = message.content.split()
 
     #Command to check a user's social credit score
-    if message.content.startswith('$based'):
+    if(msgCont[0] =='$based'):
         if(len(msgCont) == 1):
             await message.channel.send("This command requires a mention. Tag someone like this: '$based @username'")
         elif(msgCont[1].startswith('<@')):
@@ -112,11 +134,11 @@ async def on_message(message):
             await message.channel.send("The given argument was not understood. Tag someone like this: '$based @username'")
 
     #Command to print the list of the 3 most based people.
-    if message.content.startswith('$top'):
+    elif(msgCont[0] =='$top'):
         await message.channel.send(printTop())
 
     #Command to print the rank of a given user
-    if message.content.startswith('$rank'):
+    elif(msgCont[0] =='$rank'):
         if(len(msgCont) == 1):
             await message.channel.send("This command requires a mention. Tag someone like this: '$rank @username'")
         elif(msgCont[1].startswith('<@')):
@@ -124,6 +146,11 @@ async def on_message(message):
             await message.channel.send(printRank(msgCont[1]))
         else:
             await message.channel.send("The given argument was not understood. Tag someone like this: '$rank @username'")
+    
+    #I have the sense of humor of a 12 year old
+    elif(msgCont[0] == "$ligma"):
+        await message.channel.send("ligma balls ha lmao gottem")
+
 
 d = load()
 
